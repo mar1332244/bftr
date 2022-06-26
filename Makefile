@@ -1,6 +1,6 @@
 .PHONY: all
 all:
-	go build -o bftr main.go
+	go build -o /usr/local/bin/bftr main.go
 
 .PHONY: clean
 clean:
