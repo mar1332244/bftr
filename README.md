@@ -1,6 +1,6 @@
 # bftr
 
-Small utility to translate ascii text into Brainfuck code written in Go
+Small utility written in Go to translate ascii text into many Brainfuck print commands
 
 ## Installation
 
