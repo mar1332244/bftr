@@ -45,6 +45,7 @@ func TextToBrainfuck(src, dst string) error {
         for builder.Len() < 6 {
             builder.WriteByte(' ')
         }
+        builder.WriteString("| ")
         if text[i] == last {
             builder.WriteString(".\n")
             if _, err = outFile.WriteString(builder.String()); err != nil {
