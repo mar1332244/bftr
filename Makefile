@@ -1,6 +1,9 @@
+SRC=./src
+TARGET=/usr/local/bin/bftr
+
 .PHONY: all
 all:
-	go build -o /usr/local/bin/bftr main.go parser.go
+	go build -o $(TARGET) $(SRC)
 
 .PHONY: clean
 clean:

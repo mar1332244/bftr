@@ -5,7 +5,6 @@ import (
     "strings"
     "os"
     "bufio"
-    "flag"
 )
 
 const (
@@ -85,29 +84,4 @@ func TextToBrainfuck(src, dst string) error {
     }
 
     return nil
-}
-
-func init() {
-    displayBytes := flag.Bool("display-bytes", false, "display the byte printed at the start of each line")
-    flag.Parse()
-    Parse(os.Args)
-    fmt.Printf("display-bytes=%t\n", *displayBytes)
-    for i := len(os.Args) - 1; i > -1; i-- {
-        if !strings.HasPrefix(os.Args[i], "-") {
-            continue
-        }
-        os.Args = append(os.Args[:i], os.Args[i+1:]...)
-    }
-    fmt.Println(os.Args)
-    os.Exit(-1)
-}
-
-func main() {
-    if len(os.Args) < 3 {
-        fmt.Fprintln(os.Stderr, "usage: bftr [flags] [src] [dst]")
-        return
-    }
-    if err := TextToBrainfuck(os.Args[1], os.Args[2]); err != nil {
-        fmt.Fprintln(os.Stderr, err)
-    }
 }
