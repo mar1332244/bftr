@@ -7,12 +7,32 @@ import (
 )
 
 const (
-	add10 = "[->++++++++++<]>"
-	sub10 = "[->----------<]>"
+	add10 = ">%s[-<++++++++++>]<"
+	sub10 = ">%s[-<---------->]<"
 )
 
 func toBrainfuck(input string) string {
 	var builder strings.Builder
+	var last byte
+	for _, char := range []byte(input) {
+		delta := int(char) - int(last)
+		loops := delta / 10
+		extra := delta % 10
+		symbol := "+"
+		loop := add10
+		if delta < 0 {
+			loops = -delta / 10
+			extra = -delta % 10
+			symbol = "-"
+			loop = sub10
+		}
+		if 0 < loops {
+			builder.WriteString(fmt.Sprintf(loop, strings.Repeat("+", loops)))
+		}
+		last = char
+		builder.WriteString(strings.Repeat(symbol, extra))
+		builder.WriteByte('.')
+	}
 	return builder.String()
 }
 
