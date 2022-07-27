@@ -17,7 +17,7 @@ Typing the command
 $ bftr "Hello World!"
 ```
 will output the following
-```sh
+```
 >+++++++[-<++++++++++>]<++.>++[-<++++++++++>]<+++++++++.+++++++..+++.>++++++[-<---------->]<-------.>+[-<---------->]<--.>+++++[-<++++++++++>]<+++++.>++[-<++++++++++>]<++++.+++.------.--------.>++++++[-<---------->]<-------.
 ```
 Make sure when you provide text with spaces it is wrapped in double quotes otherwise only the first word will get translated.
