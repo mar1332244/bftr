@@ -1,43 +1,23 @@
 # bftr
 
-Small utility written in Go to translate ascii text into many Brainfuck print commands
+Small utility written in Go to translate ascii text into valid brainfuck code
 
 ## Installation
 
-Using git and make
-
+To install bftr run the following command
+```sh
+$  go install github.com/mar1332244/bftr@latest
 ```
-$ git clone https://github.com/mar1332244/bftr.git
-$ cd bftr
-$ make
-```
-
-This will add bftr to your path. If you wish to uninstall bftr run ```$ make clean``` while inside of the cloned directory to remove the binary from your path.
+This will place the binary executable into your $GOPATH/bin directory. From there you can move the file anywhere like ```/usr/local/bin``` for example. To uninstall the executable simply delete the file.
 
 ## Usage
 
+Typing the command 
+```sh
+$ bftr "Hello World!"
 ```
-$ bftr [flags] [src] [dst]
-$ cat hello.txt
-Hello, World!
-$ bftr hello.txt hello.bf
-$ cat hello.bf
-(72)  | >+++++++[<++++++++++>-]<++.
-(101) | >++[<++++++++++>-]<+++++++++.
-(108) | +++++++.
-(108) | .
-(111) | +++.
-(44)  | >++++++[<---------->-]<-------.
-(32)  | >+[<---------->-]<--.
-(87)  | >+++++[<++++++++++>-]<+++++.
-(111) | >++[<++++++++++>-]<++++.
-(114) | +++.
-(108) | ------.
-(100) | --------.
-(33)  | >++++++[<---------->-]<-------.
-(10)  | >++[<---------->-]<---.
+will output the following
+```sh
+>+++++++[-<++++++++++>]<++.>++[-<++++++++++>]<+++++++++.+++++++..+++.>++++++[-<---------->]<-------.>+[-<---------->]<--.>+++++[-<++++++++++>]<+++++.>++[-<++++++++++>]<++++.+++.------.--------.>++++++[-<---------->]<-------.
 ```
-
-## License
-
-bftr is under the MIT license
+Make sure when you provide text with spaces it is wrapped in double quotes otherwise only the first word will get translated.
