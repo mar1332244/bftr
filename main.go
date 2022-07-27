@@ -27,7 +27,7 @@ func toBrainfuck(input string) string {
 			loop = sub10
 		}
 		if 0 < loops {
-			builder.WriteString(fmt.Sprintf(loop, strings.Repeat("+", loops)))
+			fmt.Fprintf(&builder, loop, strings.Repeat("+", loops))
 		}
 		last = char
 		builder.WriteString(strings.Repeat(symbol, extra))
