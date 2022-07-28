@@ -29,8 +29,7 @@ func toBrainfuck(input string) string {
 		if 0 < loops {
 			fmt.Fprintf(&builder, loop, strings.Repeat("+", loops))
 		}
-		builder.WriteString(strings.Repeat(symbol, extra))
-		builder.WriteByte('.')
+		fmt.Fprint(&builder, strings.Repeat(symbol, extra), ".")
 		last = char
 	}
 	return builder.String()

@@ -14,7 +14,7 @@ This will place the binary executable into your $GOPATH/bin directory. From ther
 
 Typing the command 
 ```sh
-$ bftr "Hello World!"
+$ bftr "Hello, World!"
 ```
 will output the following
 ```
