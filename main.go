@@ -11,28 +11,30 @@ import (
 const (
 	add10 = ">%s[-<++++++++++>]<"
 	sub10 = ">%s[-<---------->]<"
+
+	createErr = "couldn't create `%s` (%s)"
 )
 
 type Flags struct {
 	maxWidth int
-	outFile  string
+	outFname string
 }
 
 func parseFlags() Flags {
 	var f Flags
-	flag.IntVar(&f.maxWidth, "w", -1, "sets the max width of a given line of output")
-	flag.StringVar(&f.outFile, "o", "stdout", "filepath to write to the output to")
+	flag.IntVar(&f.maxWidth, "w", -1, "sets the max `width` of a given line of output")
+	flag.StringVar(&f.outFname, "o", "stdout", "sets the destination of the `output`")
 	flag.Parse()
 	return f
 }
 
 func printOutput(output string, f Flags) error {
 	outFile := os.Stdout
-	if f.outFile != "stdout" {
+	if f.outFname != "stdout" {
 		var err error
-		outFile, err = os.Create(f.outFile)
+		outFile, err = os.Create(f.outFname)
 		if err, ok := err.(*os.PathError); ok {
-			return fmt.Errorf("couldn't create `%s` (%s)", err.Path, err.Err)
+			return fmt.Errorf(createErr, err.Path, err.Err)
 		}
 	}
 	if f.maxWidth <= 0 {
@@ -77,8 +79,7 @@ func toBrainfuck(input string) string {
 func main() {
 	f := parseFlags()
 	if flag.NArg() < 1 {
-		fmt.Fprintln(os.Stderr, "no input provided")
-		os.Exit(1)
+		flag.Usage()
 	}
 	input := flag.Arg(0)
 	output := toBrainfuck(input)
