@@ -13,6 +13,9 @@ const (
 	sub10 = ">%s[-<---------->]<"
 
 	createErr = "couldn't create `%s` (%s)"
+
+	wUse = "sets the max `width` of a given line of output"
+	oUse = "creates a file and prints the `output` to it"
 )
 
 type Flags struct {
@@ -22,8 +25,8 @@ type Flags struct {
 
 func parseFlags() Flags {
 	var f Flags
-	flag.IntVar(&f.maxWidth, "w", -1, "sets the max `width` of a given line of output")
-	flag.StringVar(&f.outFname, "o", "stdout", "sets the destination of the `output`")
+	flag.IntVar(&f.maxWidth, "w", -1, wUse)
+	flag.StringVar(&f.outFname, "o", "stdout", oUse)
 	flag.Parse()
 	return f
 }
@@ -80,10 +83,12 @@ func main() {
 	f := parseFlags()
 	if flag.NArg() < 1 {
 		flag.Usage()
+		os.Exit(1)
 	}
 	input := flag.Arg(0)
 	output := toBrainfuck(input)
-	if err := printOutput(output, f); err != nil {
+	err := printOutput(output, f)
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
