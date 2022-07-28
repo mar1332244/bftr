@@ -26,16 +26,25 @@ func parseFlags() Flags {
 	return f
 }
 
-func printOutput(output string, f Flags) {
+func printOutput(output string, f Flags) error {
+	outFile := os.Stdout
+	if f.outFile != "stdout" {
+		var err error
+		outFile, err = os.Create(f.outFile)
+		if err, ok := err.(*os.PathError); ok {
+			return fmt.Errorf("couldn't create `%s` (%s)", err.Path, err.Err)
+		}
+	}
 	if f.maxWidth <= 0 {
-		fmt.Println(output)
-		return
+		fmt.Fprintln(outFile, output)
+		return nil
 	}
 	buffer := bytes.NewBufferString(output)
 	for 0 < buffer.Len() {
 		line := buffer.Next(f.maxWidth)
-		fmt.Printf("%s\n", line)
+		fmt.Fprintf(outFile, "%s\n", line)
 	}
+	return nil
 }
 
 func toBrainfuck(input string) string {
@@ -73,5 +82,8 @@ func main() {
 	}
 	input := flag.Arg(0)
 	output := toBrainfuck(input)
-	printOutput(output, f)
+	if err := printOutput(output, f); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
