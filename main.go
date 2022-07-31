@@ -97,7 +97,7 @@ func readFile(fname string) (string, error) {
 		builder.WriteByte('\n')
 	}
 	if err = scanner.Err(); err != nil {
-		return "", fmt.Errorf("internal: %v", err)
+		panic(err)
 	}
 	return builder.String(), nil
 }
@@ -116,14 +116,14 @@ func main() {
 	f := parseFlags()
 	input, err := getInput(f)
 	if err != nil {
-		fmt.Fprintln(os.Stdout, err)
+		fmt.Fprintln(os.Stderr, err)
 		flag.Usage()
 		os.Exit(1)
 	}
 	output := toBrainfuck(input, f)
 	err = printOutput(output, f)
 	if err != nil {
-		fmt.Fprintln(os.Stdout, err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
