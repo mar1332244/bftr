@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
@@ -11,48 +12,48 @@ import (
 const (
 	add10 = ">%s[-<++++++++++>]<"
 	sub10 = ">%s[-<---------->]<"
-
-	createErr = "couldn't create `%s` (%s)"
-
-	wUse = "sets the max `width` of a given line of output"
-	oUse = "creates a file and prints the `output` to it"
 )
 
 type Flags struct {
-	maxWidth int
-	outFname string
+	width  int
+	output string
+	from   string
 }
 
 func parseFlags() Flags {
 	var f Flags
-	flag.IntVar(&f.maxWidth, "w", -1, wUse)
-	flag.StringVar(&f.outFname, "o", "stdout", oUse)
+	flag.IntVar(&f.width, "w", -1, "split output into lines of specified `width`")
+	flag.StringVar(&f.output, "o", "stdout", "write the `output` to a specified file")
+	flag.StringVar(&f.from, "f", "", "get the input `from` a specified file")
 	flag.Parse()
 	return f
 }
 
 func printOutput(output string, f Flags) error {
 	outFile := os.Stdout
-	if f.outFname != "stdout" {
+	if f.output != "stdout" {
 		var err error
-		outFile, err = os.Create(f.outFname)
+		outFile, err = os.Create(f.output)
 		if err, ok := err.(*os.PathError); ok {
-			return fmt.Errorf(createErr, err.Path, err.Err)
+			return fmt.Errorf(
+				"couldn't create `%s` (%s)",
+				err.Path, err.Err,
+			)
 		}
 	}
-	if f.maxWidth <= 0 {
+	if f.width <= 0 {
 		fmt.Fprintln(outFile, output)
 		return nil
 	}
 	buffer := bytes.NewBufferString(output)
 	for 0 < buffer.Len() {
-		line := buffer.Next(f.maxWidth)
+		line := buffer.Next(f.width)
 		fmt.Fprintf(outFile, "%s\n", line)
 	}
 	return nil
 }
 
-func toBrainfuck(input string) string {
+func toBrainfuck(input string, f Flags) string {
 	var builder strings.Builder
 	var last byte
 	for i := 0; i < len(input); i++ {
@@ -79,17 +80,48 @@ func toBrainfuck(input string) string {
 	return builder.String()
 }
 
+func readFile(fname string) (string, error) {
+	inFile, err := os.Open(fname)
+	if err, ok := err.(*os.PathError); ok {
+		return "", fmt.Errorf(
+			"couldn't open `%s` (%s)",
+			err.Path, err.Err,
+		)
+	}
+	var builder strings.Builder
+	scanner := bufio.NewScanner(inFile)
+	for scanner.Scan() {
+		builder.WriteString(scanner.Text())
+		builder.WriteByte('\n')
+	}
+	if err = scanner.Err(); err != nil {
+		return "", fmt.Errorf("internal: %v", err)
+	}
+	return builder.String(), nil
+}
+
+func getInput(f Flags) (string, error) {
+	if f.from != "" {
+		return readFile(f.from)
+	}
+	if flag.NArg() == 0 {
+		return "", fmt.Errorf("no input provided")
+	}
+	return flag.Arg(0), nil
+}
+
 func main() {
 	f := parseFlags()
-	if flag.NArg() < 1 {
+	input, err := getInput(f)
+	if err != nil {
+		fmt.Fprintln(os.Stdout, err)
 		flag.Usage()
 		os.Exit(1)
 	}
-	input := flag.Arg(0)
-	output := toBrainfuck(input)
-	err := printOutput(output, f)
+	output := toBrainfuck(input, f)
+	err = printOutput(output, f)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stdout, err)
 		os.Exit(1)
 	}
 }
