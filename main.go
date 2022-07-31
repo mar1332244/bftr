@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
@@ -102,11 +103,14 @@ func readFile(fname string) (string, error) {
 	return builder.String(), nil
 }
 
-func getPipedInput() (string, error) {
+func readPipedInput() (string, error) {
 	var builder strings.Builder
 	buffer := make([]byte, 1024)
-	n, err := os.Stdin.Read(buffer)
-	for ; 0 < n; n, err = os.Stdin.Read(buffer) {
+	for {
+		n, err := os.Stdin.Read(buffer)
+		if n == 0 && err == io.EOF {
+			break
+		}
 		if err != nil {
 			panic(err)
 		}
@@ -124,7 +128,7 @@ func getInput(f Flags) (string, error) {
 		panic(err)
 	}
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		return getPipedInput()
+		return readPipedInput()
 	}
 	if flag.NArg() == 0 {
 		return "", fmt.Errorf("no input provided")
