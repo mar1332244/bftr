@@ -29,17 +29,21 @@ func parseFlags() Flags {
 	return f
 }
 
+func getOutputFile(f Flags) (*os.File, error) {
+	if f.output == "stdout" {
+		return os.Stdout, nil
+	}
+	outFile, err := os.Create(f.output)
+	if err, ok := err.(*os.PathError); ok {
+		return nil, fmt.Errorf("couldn't create `%s` (%s)", err.Path, err.Err)
+	}
+	return outFile, nil
+}
+
 func printOutput(output string, f Flags) error {
-	outFile := os.Stdout
-	if f.output != "stdout" {
-		var err error
-		outFile, err = os.Create(f.output)
-		if err, ok := err.(*os.PathError); ok {
-			return fmt.Errorf(
-				"couldn't create `%s` (%s)",
-				err.Path, err.Err,
-			)
-		}
+	outFile, err := getOutputFile(f)
+	if err != nil {
+		return err
 	}
 	if f.width <= 0 {
 		fmt.Fprintln(outFile, output)
@@ -83,10 +87,7 @@ func toBrainfuck(input string, f Flags) string {
 func readFile(fname string) (string, error) {
 	inFile, err := os.Open(fname)
 	if err, ok := err.(*os.PathError); ok {
-		return "", fmt.Errorf(
-			"couldn't open `%s` (%s)",
-			err.Path, err.Err,
-		)
+		return "", fmt.Errorf("couldn't open `%s` (%s)", err.Path, err.Err)
 	}
 	var builder strings.Builder
 	scanner := bufio.NewScanner(inFile)
