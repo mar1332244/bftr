@@ -57,6 +57,7 @@ func printOutput(output string, f Flags) error {
 	return nil
 }
 
+// TODO: implement a better conversion algorithm
 func toBrainfuck(input string, f Flags) string {
 	var builder strings.Builder
 	var last byte
