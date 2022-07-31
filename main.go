@@ -57,16 +57,6 @@ func printOutput(output string, f Flags) error {
 	return nil
 }
 
-/*
-+++++++>[-<++++++++++>]<++
-++++++>[-<++++++++++++]<
-++++++++>[-<++++++++]<
-+>[-<++++++++++>]<+++
-++>[-<+++++>]<+++
-++>[-<++++++++++>]<+++++++++
-+++++>[-<+++++>]<++++
-*/
-
 // TODO: implement a better conversion algorithm
 func toBrainfuck(input string, f Flags) string {
 	var builder strings.Builder
@@ -112,6 +102,19 @@ func readFile(fname string) (string, error) {
 	return builder.String(), nil
 }
 
+func getPipedInput() (string, error) {
+	var builder strings.Builder
+	buffer := make([]byte, 1024)
+	n, err := os.Stdin.Read(buffer)
+	for ; 0 < n; n, err = os.Stdin.Read(buffer) {
+		if err != nil {
+			panic(err)
+		}
+		builder.Write(buffer[:n])
+	}
+	return builder.String(), nil
+}
+
 func getInput(f Flags) (string, error) {
 	if f.from != "" {
 		return readFile(f.from)
@@ -121,9 +124,7 @@ func getInput(f Flags) (string, error) {
 		panic(err)
 	}
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		reader := bufio.NewReader(os.Stdin)
-		input, _ := reader.ReadString('\n')
-		return input, nil
+		return getPipedInput()
 	}
 	if flag.NArg() == 0 {
 		return "", fmt.Errorf("no input provided")
