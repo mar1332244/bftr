@@ -91,6 +91,7 @@ func readFile(fname string) (string, error) {
 	if err, ok := err.(*os.PathError); ok {
 		return "", fmt.Errorf("couldn't open `%s` (%s)", err.Path, err.Err)
 	}
+	defer inFile.Close()
 	var builder strings.Builder
 	scanner := bufio.NewScanner(inFile)
 	for scanner.Scan() {
