@@ -55,6 +55,9 @@ func printOutput(output string, f Flags) error {
 		line := buffer.Next(f.width)
 		fmt.Fprintf(outFile, "%s\n", line)
 	}
+	if outFile != os.Stdin {
+		outFile.Close()
+	}
 	return nil
 }
 
