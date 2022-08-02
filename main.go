@@ -16,22 +16,24 @@ const (
 )
 
 type Flags struct {
-    width  int
+    width  uint
     output string
     from   string
+    doWrap bool
 }
 
 func parseFlags() Flags {
     var f Flags
-    flag.IntVar(&f.width, "w", -1, "split output into lines of specified `width`")
-    flag.StringVar(&f.output, "o", "stdout", "write the `output` to a specified file")
-    flag.StringVar(&f.from, "f", "", "get the input `from` a specified file")
+    flag.UintVar(&f.width, "w", 0, "split output into lines of specified width")
+    flag.StringVar(&f.output, "o", "", "write the output to a specified file")
+    flag.StringVar(&f.from, "f", "", "get the input from a specified file")
+    flag.BoolVar(&f.doWrap, "do-wrap", false, "consider cell wrapping when creating output")
     flag.Parse()
     return f
 }
 
 func getOutputFile(f Flags) (*os.File, error) {
-    if f.output == "stdout" {
+    if f.output == "" {
         return os.Stdout, nil
     }
     outFile, err := os.Create(f.output)
@@ -45,6 +47,9 @@ func printOutput(output string, f Flags) error {
     outFile, err := getOutputFile(f)
     if err != nil {
         return err
+    }
+    if f.width == 0 {
+        f.width = uint(len(output))
     }
     for 0 < len(output) {
         a := float64(len(output))
