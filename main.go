@@ -107,11 +107,11 @@ func toBrainfuck(input string, f Flags) string {
     return builder.String()
 }
 
-func readFile(fp io.Reader) string {
+func readFile(r io.Reader) string {
     var builder strings.Builder
     buffer := make([]byte, 1024)
     for {
-        n, err := fp.Read(buffer)
+        n, err := r.Read(buffer)
         if n == 0 && err == io.EOF {
             break
         }
