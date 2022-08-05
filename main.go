@@ -1,7 +1,6 @@
 package main
 
 import (
-    "bufio"
     "flag"
     "fmt"
     "io"
@@ -11,8 +10,9 @@ import (
 )
 
 const (
-    add10 = ">%s[-<++++++++++>]<"
-    sub10 = ">%s[-<---------->]<"
+    add10  = ">%s[-<++++++++++>]<"
+    sub10  = ">%s[-<---------->]<"
+    errMsg = "couldn't %s `%s` (%s)"
 )
 
 type Flags struct {
@@ -40,13 +40,20 @@ func parseFlags() Flags {
     return f
 }
 
+func formatError(err error, verb string) error {
+    if err, ok := err.(*os.PathError); ok {
+        return fmt.Errorf(errMsg, verb, err.Path, err.Err)
+    }
+    return fmt.Errorf("unknown error encountered")
+}
+
 func getOutputFile(f Flags) (*os.File, error) {
     if f.output == "" {
         return os.Stdout, nil
     }
     outFile, err := os.Create(f.output)
-    if err, ok := err.(*os.PathError); ok {
-        return nil, fmt.Errorf("couldn't create `%s` (%s)", err.Path, err.Err)
+    if err != nil {
+        return nil, formatError(err, "create")
     }
     return outFile, nil
 }
@@ -100,29 +107,11 @@ func toBrainfuck(input string, f Flags) string {
     return builder.String()
 }
 
-func readFile(fname string) (string, error) {
-    inFile, err := os.Open(fname)
-    if err, ok := err.(*os.PathError); ok {
-        return "", fmt.Errorf("couldn't open `%s` (%s)", err.Path, err.Err)
-    }
-    defer inFile.Close()
-    var builder strings.Builder
-    scanner := bufio.NewScanner(inFile)
-    for scanner.Scan() {
-        builder.WriteString(scanner.Text())
-        builder.WriteByte('\n')
-    }
-    if err = scanner.Err(); err != nil {
-        panic(err)
-    }
-    return builder.String(), nil
-}
-
-func readPipedInput() (string, error) {
+func readFile(fp io.Reader) string {
     var builder strings.Builder
     buffer := make([]byte, 1024)
     for {
-        n, err := os.Stdin.Read(buffer)
+        n, err := fp.Read(buffer)
         if n == 0 && err == io.EOF {
             break
         }
@@ -131,19 +120,25 @@ func readPipedInput() (string, error) {
         }
         builder.Write(buffer[:n])
     }
-    return builder.String(), nil
+    return builder.String()
 }
 
 func getInput(f Flags) (string, error) {
-    if f.from != "" {
-        return readFile(f.from)
-    }
     stat, err := os.Stdin.Stat()
     if err != nil {
         panic(err)
     }
     if (stat.Mode() & os.ModeCharDevice) == 0 {
-        return readPipedInput()
+        return readFile(os.Stdin), nil
+    }
+    if f.from != "" {
+        inFile, err := os.Open(f.from)
+        if err != nil {
+            return "", formatError(err, "open")
+        }
+        defer inFile.Close()
+        input := readFile(inFile)
+        return input, nil
     }
     if flag.NArg() == 0 {
         return "", fmt.Errorf("no input provided")
